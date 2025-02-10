@@ -47,7 +47,7 @@ O arquivo principal da API, desenvolvido com FastAPI, expõe os seguintes endpoi
 
 ---
 
-## 🌐 Como funciona a API (Explicação Detalhada)
+## 🌐 Como funciona a API 
 
 1. **Iniciar a API**  
    Execute o comando:  

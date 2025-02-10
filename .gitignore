@@ -1,0 +1,57 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches e Logs
+*.log
+*.cache
+*.pyo
+*.pyd
+
+# Diretórios de configuração local
+venv/
+env/
+.venv/
+
+# Configuração do ambiente
+.env
+.env.local
+.env.*.local
+
+# Dados temporários / arquivos de saída
+*.sqlite3
+*.db
+*.csv
+*.json
+*.pkl
+*.h5
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Arquivos de dependências
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Arquivos gerados
+.DS_Store
+*.bak
+*.tmp
+Thumbs.db
+
+# Build e distribuições
+build/
+dist/
+*.egg-info/
+*.eggs/
+MANIFEST
+
+# Arquivos relacionados ao Jupyter
+.ipynb_checkpoints/
+
+# Arquivos do FastAPI/uvicorn
+*.pid
+*.sock

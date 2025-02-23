@@ -3,182 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bitcoin Price Prediction Dashboardd</title>
-
-  <!-- Fonte Google: Montserrat -->
+  <title>Bitcoin Price Prediction Dashboard</title>
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link 
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" 
     rel="stylesheet"
   >
-
-  <style>
-    /* RESET BÁSICO */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: 'Montserrat', Arial, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-      margin: 0;
-    }
-
-    /* Cabeçalho / Banner */
-    .header {
-      background-color: #2b3e50;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-    }
-    .header h1 {
-      font-weight: 700;
-      font-size: 1.8rem;
-      margin-bottom: 5px;
-    }
-    .header .current-date {
-      font-weight: 300;
-      font-size: 1rem;
-      opacity: 0.9;
-    }
-
-    /* Container Geral */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px 30px;
-    }
-
-    /* Botões */
-    .button-group {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-bottom: 20px;
-    }
-    .btn {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background-color 0.2s ease-in-out;
-      font-weight: 600;
-    }
-    .btn:hover {
-      background-color: #45a049;
-    }
-
-    /* Grid de Indicadores (4 cards, 2 por linha) */
-    .indicators-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-    .card {
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      padding: 20px;
-    }
-    .card h2 {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-      color: #2b3e50;
-    }
-    .card .value {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 5px;
-      color: #333;
-    }
-    .card .subtitle {
-      font-size: 0.9rem;
-      font-weight: 300;
-      color: #555;
-    }
-    .positive {
-      color: #2d9c41;
-      font-weight: 700;
-    }
-    .negative {
-      color: #c0392b;
-      font-weight: 700;
-    }
-
-    /* Seção de Previsão */
-    .prediction-section {
-      margin-top: 30px;
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .prediction-section h3 {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #2b3e50;
-      margin-bottom: 15px;
-    }
-    .prediction-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    .prediction-table th,
-    .prediction-table td {
-      text-align: left;
-      padding: 12px 8px;
-      border-bottom: 1px solid #eee;
-      font-size: 0.95rem;
-    }
-    .prediction-table th {
-      background-color: #f8f8f8;
-      font-weight: 600;
-      color: #555;
-    }
-    .recommendation {
-      margin-top: 15px;
-      font-size: 1rem;
-      font-weight: 600;
-      text-align: center;
-    }
-    .recommendation.success {
-      color: #2d9c41;
-    }
-    .recommendation.danger {
-      color: #c0392b;
-    }
-
-    /* Rodapé */
-    .footer {
-      text-align: center;
-      font-size: 0.85rem;
-      color: #777;
-      margin-top: 40px;
-      padding: 20px;
-    }
-    .footer a {
-      color: #555;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <!-- Importa o arquivo de estilos externo -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Overlay de Loading (spinner) -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
   <!-- Cabeçalho -->
   <div class="header">
     <h1>Bitcoin Forecast - Executive Dashboard</h1>
     <div class="current-date" id="current-date">Data: --/--/----</div>
+    <div class="last-updated" id="last-updated" style="display: none;">
+      Última atualização: <span id="last-updated-value"></span> (UTC da Binance)
+    </div>
   </div>
+
+  <!-- Container de Mensagens de Erro -->
+  <div class="error-container" id="error-container" style="display: none;"></div>
 
   <!-- Conteúdo Principal -->
   <div class="container">
@@ -190,7 +40,7 @@
     <!-- Seção de Indicadores (4 cards) -->
     <div class="indicators-grid" id="market-data" style="display: none;">
       <!-- Card 1: Abertura BTC (Dia) -->
-      <div class="card">
+      <div class="card" id="card-btc-open">
         <h2>Abertura BTC (Dia)</h2>
         <div class="value" id="btcOpen">$0.00</div>
         <div class="subtitle">
@@ -199,16 +49,16 @@
       </div>
 
       <!-- Card 2: Cotação Atual BTC e Variação -->
-      <div class="card">
+      <div class="card" id="card-btc-current">
         <h2>Cotação Atual BTC</h2>
         <div class="value" id="btcCurrent">$0.00</div>
         <div class="subtitle">
-          Variação em relação à Abertura: <span id="btcVariation">0%</span>
+          Variação vs. Abertura: <span id="btcVariation">0%</span>
         </div>
       </div>
 
       <!-- Card 3: Abertura VIX (Dia) -->
-      <div class="card">
+      <div class="card" id="card-vix-open">
         <h2>Abertura VIX (Dia)</h2>
         <div class="value" id="vixOpen">--</div>
         <div class="subtitle">
@@ -217,14 +67,13 @@
       </div>
 
       <!-- Card 4: VIX Cotação Atual -->
-      <div class="card">
+      <div class="card" id="card-vix-current">
         <h2>VIX Cotação Atual</h2>
         <div class="value" id="vixCurrentPrice">--</div>
         <div class="subtitle">
           Última Cotação do VIX
         </div>
       </div>
-
     </div>
 
     <!-- Seção de Previsão -->
@@ -253,107 +102,7 @@
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('current-date').textContent =
-        'Data: ' + new Date().toLocaleDateString('pt-BR');
-      loadMarketData();
-    });
-
-    // URL base da API FastAPI
-    let baseURL = 'http://127.0.0.1:8080';
-
-    async function loadMarketData() {
-      try {
-        const responseMarket = await fetch(`${baseURL}/market-data`, { cache: 'no-cache' });
-        if (!responseMarket.ok) {
-          throw new Error('Erro ao obter dados de mercado (/market-data).');
-        }
-        const marketData = await responseMarket.json();
-        console.log("marketData:", marketData); // Verifica a resposta no console
-
-        // Atualiza os cards de BTC
-        document.getElementById('btcOpen').textContent = `$${formatNumber(marketData.btc_open)}`;
-        document.getElementById('btcCloseMa3').textContent = `$${formatNumber(marketData.btc_close_ma3)}`;
-        document.getElementById('btcCurrent').textContent = `$${formatNumber(marketData.btc_current)}`;
-
-        // Calcula e exibe a variação percentual entre abertura e preço atual
-        const btcOpen = marketData.btc_open;
-        const btcCurrent = marketData.btc_current;
-        const variation = ((btcCurrent - btcOpen) / btcOpen) * 100;
-        const variationEl = document.getElementById('btcVariation');
-        variationEl.textContent = `${formatNumber(variation)}%`;
-        if (variation >= 0) {
-          variationEl.classList.add('positive');
-          variationEl.classList.remove('negative');
-        } else {
-          variationEl.classList.add('negative');
-          variationEl.classList.remove('positive');
-        }
-
-        // Atualiza os cards de VIX
-        document.getElementById('vixOpen').textContent = formatNumber(marketData.vix_open);
-        document.getElementById('vixCloseMa3').textContent = formatNumber(marketData.vix_close_ma3);
-
-        // Agora, chama o endpoint específico para VIX atual
-        const responseVix = await fetch(`${baseURL}/vix-current-price`, { cache: 'no-cache' });
-        if (!responseVix.ok) {
-          throw new Error('Erro ao obter a cotação atual do VIX (/vix-current-price).');
-        }
-        const vixData = await responseVix.json();
-        console.log("vixData:", vixData); // Verifica a resposta do VIX
-        document.getElementById('vixCurrentPrice').textContent = formatNumber(vixData.current_price);
-
-        // Exibe a grade de indicadores
-        document.getElementById('market-data').style.display = 'grid';
-      } catch (err) {
-        console.error(err);
-        alert("Falha ao carregar dados de mercado. Verifique a API ou a conexão.");
-      }
-    }
-
-    async function refreshMarketCache() {
-      try {
-        const response = await fetch(`${baseURL}/refresh-cache`, { method: 'POST', cache: 'no-cache' });
-        if (!response.ok) {
-          throw new Error('Erro ao atualizar o cache de mercado (/refresh-cache).');
-        }
-        const data = await response.json();
-        alert(data.message || "Cache atualizado com sucesso.");
-        loadMarketData();
-      } catch (err) {
-        console.error(err);
-        alert("Erro ao atualizar cache de mercado.");
-      }
-    }
-
-    async function getPrediction() {
-      try {
-        const response = await fetch(`${baseURL}/predict`, { method: 'POST', cache: 'no-cache' });
-        if (!response.ok) {
-          throw new Error('Erro ao obter a previsão (/predict).');
-        }
-        const data = await response.json();
-        document.getElementById('predictDate').textContent = data.date;
-        const predictRecommendationEl = document.getElementById('predictRecommendation');
-        if (data.predicted_class === 1) {
-          predictRecommendationEl.textContent = 'Operar (possível alta)';
-          predictRecommendationEl.className = 'recommendation success';
-        } else {
-          predictRecommendationEl.textContent = 'Não operar (possível queda)';
-          predictRecommendationEl.className = 'recommendation danger';
-        }
-        document.getElementById('prediction-result').style.display = 'block';
-      } catch (err) {
-        console.error(err);
-        alert("Erro ao obter a previsão.");
-      }
-    }
-
-    function formatNumber(num) {
-      if (num === null || num === undefined || isNaN(num)) return '--';
-      return Number(num).toFixed(2);
-    }
-  </script>
+  <!-- Importa o script principal da aplicação -->
+  <script src="script.js"></script>
 </body>
 </html>
